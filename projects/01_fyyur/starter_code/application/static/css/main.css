@@ -209,3 +209,32 @@ h2.monospace {
 .subtitle {
   opacity: 0.5;
 }
+.check-box {
+  line-height: 1;
+  height: 16px;
+}
+.form-control:focus {
+    outline: 0;
+    box-shadow: none;
+}
+.form-control.check-box {
+    border: none;
+    box-shadow: none;
+}
+.checkbox-wrapper {
+    width: 16px;
+    height: 16px;
+}
+.flex {
+    display: flex;
+}
+.justify-between {
+   justify-content: space-between;
+}
+.hidden {
+    display: none;
+}
+.error {
+    color: red;
+    font-weight: bold;
+}

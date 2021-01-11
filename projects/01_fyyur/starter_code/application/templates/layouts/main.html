@@ -1,7 +1,7 @@
 <!doctype html>
 <head>
 <meta charset="utf-8">
-<title>{% block title %}{% endblock %}</title>
+<title>Fyyur</title>
 
 <!-- meta -->
 <meta name="description" content="">
@@ -32,13 +32,13 @@
 <script src="/static/js/libs/moment.min.js"></script>
 <script type="text/javascript" src="/static/js/script.js" defer></script>
 <!--[if lt IE 9]><script src="/static/js/libs/respond-1.4.2.min.js"></script><![endif]-->
+<script type="text/javascript" src="/static/js/venues_controller.js" defer></script>
+<script type="text/javascript" src="/static/js/new_venue_controller.js" defer></script>
 <!-- /scripts -->
 </head>
 <body>
-
   <!-- Wrap all page content here -->
   <div id="wrap">
-
     <!-- Fixed navbar -->
     <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
@@ -58,6 +58,7 @@
                 (request.endpoint == 'show_venue') %}
               <form class="search" method="post" action="/venues/search">
                 <input class="form-control"
+                  id="search-venue"
                   type="search"
                   name="search_term"
                   placeholder="Find a venue"
@@ -69,6 +70,7 @@
                 (request.endpoint == 'show_artist') %}
               <form class="search" method="post" action="/artists/search">
                 <input class="form-control"
+                  id="search-artist"
                   type="search"
                   name="search_term"
                   placeholder="Find an artist"
@@ -87,23 +89,17 @@
     </div>
 
     <!-- Begin page content -->
+    {% block content %}
     <main id="content" role="main" class="container">
-
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-block alert-info fade in">
-              <a class="close" data-dismiss="alert">&times;</a>
-              {{ message }}
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      {% block content %}{% endblock %}
-      
+      {% for message in get_flashed_messages() %}
+        <div class="alert alert-block alert-info fade in">
+          <a class="close" data-dismiss="alert">&times;</a>
+          {{ message }}
+        </div>
+      {% endfor %}
+      {% block page_content %}{% endblock %}
     </main>
-
+    {% endblock %}
   </div>
 
   <div id="footer">
