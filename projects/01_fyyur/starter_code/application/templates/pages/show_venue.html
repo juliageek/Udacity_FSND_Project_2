@@ -6,6 +6,24 @@
 		<h1 class="monospace">
 			{{ venue.name }}
 		</h1>
+		<div class="buttons-container">
+			<button
+				class="btn btn-primary"
+				id="edit-venue"
+				data-id="{{ venue.id }}"
+			>
+				<a href="/venues/{{ venue.id }}/edit">
+					Edit Venue
+				</a>
+			</button>
+			<button
+					class="btn btn-danger"
+					id="delete-venue"
+					data-id="{{ venue.id }}"
+			>
+				Delete Venue
+			</button>
+		</div>
 		<p class="subtitle">
 			ID: {{ venue.id }}
 		</p>
@@ -75,5 +93,5 @@
 	</div>
 </section>
 
-{% endblock %}
+{% endblock page_content%}
 

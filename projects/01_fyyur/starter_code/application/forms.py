@@ -55,7 +55,7 @@ class VenueForm(Form):
         'website', validators=[Optional(), URL()]
     )
     seeking_talent = BooleanField(
-        'seeking_talent', render_kw={'checked': True}
+        'seeking_talent', render_kw={'checked': False}
     )
     seeking_description = TextAreaField(
         'seeking_description'
@@ -65,6 +65,10 @@ class VenueForm(Form):
         phone_prefixes = [x.prefix for x in models.Phone.query.filter_by(state=self.state.data).all()]
         if int(phone.data[:3]) not in phone_prefixes:
             raise ValidationError('Enter a valid prefix phone number')
+
+    def validate_seeking_description(self, seeking_description):
+        if self.seeking_talent.data is True and seeking_description.data == '':
+            raise ValidationError('Enter a short description of what you\'re looking for')
 
 
 class ArtistForm(Form):

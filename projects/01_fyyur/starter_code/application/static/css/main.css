@@ -25,9 +25,6 @@ a {
   background: initial;
   color: initial;
 }
-p.lead {
-  margin-top: 30px;
-}
 ::selection {
   background: #555;
   color: #FFF;
@@ -237,4 +234,11 @@ h2.monospace {
 .error {
     color: red;
     font-weight: bold;
+}
+#edit-venue > a {
+    text-decoration: none;
+    color: inherit;
+}
+.buttons-container {
+    margin-bottom: 24px;
 }

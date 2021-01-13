@@ -1,5 +1,5 @@
-from flask import current_app as app, jsonify
-from flask import flash, redirect, render_template, request, url_for
+from flask import current_app as app
+from flask import flash, redirect, render_template, request, url_for, jsonify, abort
 import logging
 from logging import Formatter, FileHandler
 from sqlalchemy import desc, text
@@ -116,8 +116,8 @@ def create_venue_submission():
         try:
             db.session.add(venue)
             db.session.commit()
-            flash('Venue was successfully created!')
-        except IndexError:
+            flash('Venue was created!')
+        except():
             flash('An error occurred. Venue ' + body['name'] + ' could not be created.')
             db.session.rollback()
         finally:
@@ -129,12 +129,22 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+    error = False
+    try:
+        venue = models.Venue.query.get(venue_id)
+        db.session.delete(venue)
+        db.session.commit()
+        flash('Venue was deleted!')
+    except():
+        db.session.rollback()
+        error = True
+    finally:
+        db.session.close()
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    if error:
+        abort(500)
+    else:
+        return jsonify({'message': 'Success'})
 
 
 #  Artists
@@ -283,30 +293,64 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = forms.VenueForm()
+    form = forms.VenueForm(csrf_enabled=False)
+    venue_to_edit = models.Venue.query.filter_by(id=venue_id).first()
+
     venue = {
-        "id": 1,
-        "name": "The Musical Hop",
-        "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-        "address": "1015 Folsom Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "123-123-1234",
-        "website": "https://www.themusicalhop.com",
-        "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
-        "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-        "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
+        "id": venue_to_edit.id,
+        "name": venue_to_edit.name
     }
-    # TODO: populate form with values from venue with ID <venue_id>
+
+    form.name.data = venue_to_edit.name
+    form.city.data = venue_to_edit.city
+    form.state.data = venue_to_edit.state
+    form.genres.data = [x.id for x in venue_to_edit.genres]
+    form.address.data = venue_to_edit.address
+    form.phone.data = venue_to_edit.phone
+    form.facebook_link.data = venue_to_edit.facebook_link
+    form.image_link.data = venue_to_edit.image_link
+    form.website.data = venue_to_edit.website
+    form.seeking_talent.data = venue_to_edit.seeking_talent
+    form.seeking_description.data = venue_to_edit.seeking_description
+
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-    # TODO: take values from the form submitted, and update existing
-    # venue record with ID <venue_id> using the new attributes
-    return redirect(url_for('show_venue', venue_id=venue_id))
+    body = request.get_json()
+
+    genres_to_save = [models.Genre.query.filter_by(id=genre).all()[0] for genre in body['genres']]
+    venue = models.Venue.query.get(venue_id)
+    venue.name = body['name']
+    venue.city = body['city']
+    venue.phone = body['phone']
+    venue.state = body['state']
+    venue.address = body['address']
+    venue.image_link = body['image_link']
+    venue.facebook_link = body['facebook_link']
+    venue.genres = genres_to_save
+    venue.website = body['website']
+    venue.seeking_talent = body['seeking_talent']
+    venue.seeking_description = body['seeking_description']
+
+    form = forms.VenueForm(csrf_enabled=False)
+    is_valid = form.validate()
+    response = jsonify({'message': 'Success'})
+    response.headers['Content-Type'] = 'application/json'
+
+    if is_valid:
+        try:
+            db.session.commit()
+            flash('Venue was successfully updated!')
+        except IndexError:
+            flash('An error occurred. Venue ' + body['name'] + ' could not be updated .')
+            db.session.rollback()
+        finally:
+            db.session.close()
+    else:
+        response = jsonify({'message': 'Errors', 'errors': form.errors})
+    return response
 
 
 #  Create Artist

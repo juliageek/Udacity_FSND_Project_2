@@ -31,7 +31,7 @@
       <div class="form-group">
         <label for="image_link">Venue photo link</label>
         {{ form.image_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
-        <div class="error hidden" id="image_link_error"></div>
+        <div class="errors hidden" id="image_link_error"></div>
       </div>
       <div class="form-group">
         <label for="genres">Genres</label>
@@ -41,12 +41,12 @@
       <div class="form-group">
         <label for="facebook_link">Facebook Link</label>
         {{ form.facebook_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}
-        <div class="error hidden" id="facebook_link_error"></div>
+        <div class="errors hidden" id="facebook_link_error"></div>
       </div>
       <div class="form-group">
         <label for="website">Venue Website</label>
         {{ form.website(class_ = 'form-control', placeholder='http://', autofocus = true) }}
-        <div class="error hidden" id="website_error"></div>
+        <div class="errors hidden" id="website_error"></div>
       </div>
       <div class="form-group">
         <div class="flex justify-between">
@@ -65,4 +65,4 @@
       <input type="submit" value="Create Venue" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>
-{% endblock %}
+{% endblock page_content%}

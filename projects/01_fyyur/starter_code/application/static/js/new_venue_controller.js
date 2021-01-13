@@ -8,38 +8,37 @@ if(seekingTalent) {
   }
 }
 
-
 // create new venue
 if (venueForm) {
     venueForm.onsubmit = function(e) {
-  e.preventDefault();
-  const errors = document.querySelectorAll('.errors');
+      e.preventDefault();
+      const errors = document.querySelectorAll('.errors');
 
-  errors.forEach(function(error) {
-    error.innerHTML = '';
-  })
+      errors.forEach(function(error) {
+        error.innerHTML = '';
+      })
 
-  const genreSelect = document.getElementById('genres');
-  const selectedOptions = Array.from(genreSelect.options).filter(function(option) {
-    return option.selected;
-  })
-  .map(function(option) {
-    return option.value;
-  })
-    fetch('/venues/create', {
-      method: 'POST',
-      body: JSON.stringify({
-           'name': document.getElementById('name').value,
-           'city': document.getElementById('city').value,
-           'state': document.getElementById('state').value,
-           'address': document.getElementById('address').value,
-           'phone': document.getElementById('phone').value,
-           'image_link': document.getElementById('image_link').value,
-           'genres': selectedOptions,
-           'facebook_link': document.getElementById('facebook_link').value,
-           'website': document.getElementById('website').value,
-           'seeking_talent': document.getElementById('seeking_talent').checked,
-           'seeking_description': document.getElementById('seeking_description').value
+      const genreSelect = document.getElementById('genres');
+      const selectedOptions = Array.from(genreSelect.options).filter(function(option) {
+        return option.selected;
+      })
+      .map(function(option) {
+        return option.value;
+      })
+      fetch('/venues/create', {
+        method: 'POST',
+        body: JSON.stringify({
+          'name': document.getElementById('name').value,
+          'city': document.getElementById('city').value,
+          'state': document.getElementById('state').value,
+          'address': document.getElementById('address').value,
+          'phone': document.getElementById('phone').value,
+          'image_link': document.getElementById('image_link').value,
+          'genres': selectedOptions,
+          'facebook_link': document.getElementById('facebook_link').value,
+          'website': document.getElementById('website').value,
+          'seeking_talent': document.getElementById('seeking_talent').checked,
+          'seeking_description': document.getElementById('seeking_description').value
         }),
         headers: {
           'Content-Type': 'application/json'
@@ -47,7 +46,8 @@ if (venueForm) {
       })
       .then(function(response) {
         return response.json();
-      }).then(function (text) {
+      })
+      .then(function (text) {
         if (text.message === 'Success') {
           window.location.reload(true);
         } else {
@@ -58,12 +58,12 @@ if (venueForm) {
               errorMessage.className = "error"
               errorMessage.innerHTML = message;
               document.getElementById(`${key}_error`).appendChild(errorMessage);
+            })
           })
-        })
-      }
-    })
-    .catch(function(e) {
-      console.log('error----', e);
-    })
-  }
+        }
+      })
+      .catch(function(e) {
+        console.log('error----', e);
+      })
+    }
 }
