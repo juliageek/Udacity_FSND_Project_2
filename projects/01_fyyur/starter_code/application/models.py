@@ -5,6 +5,11 @@ venue_genres = db.Table('venue_genres',
                         db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key=True)
                         )
 
+artist_genres = db.Table('artist_genres',
+                         db.Column('genre_id', db.Integer, db.ForeignKey('Genre.id'), primary_key=True),
+                         db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key=True)
+                         )
+
 
 class Venue(db.Model):
     __tablename__ = 'Venue'
@@ -53,7 +58,10 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    website = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String(120), db.CheckConstraint('seeking_talent=True'))
+    genres = db.relationship('Genre', secondary=artist_genres, backref=db.backref('artists', lazy=True))
 

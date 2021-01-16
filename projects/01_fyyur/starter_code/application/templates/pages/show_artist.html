@@ -6,12 +6,30 @@
 		<h1 class="monospace">
 			{{ artist.name }}
 		</h1>
+		<div class="buttons-container">
+			<button
+				class="btn btn-primary"
+				id="edit-artist"
+				data-id="{{ artist.id }}"
+			>
+				<a href="/artists/{{ artist.id }}/edit">
+					Edit Artist
+				</a>
+			</button>
+			<button
+					class="btn btn-danger"
+					id="delete-artist"
+					data-id="{{ artist.id }}"
+			>
+				Delete Artist
+			</button>
+		</div>
 		<p class="subtitle">
 			ID: {{ artist.id }}
 		</p>
 		<div class="genres">
 			{% for genre in artist.genres %}
-			<span class="genre">{{ genre }}</span>
+			<span class="genre">{{ genre.name }}</span>
 			{% endfor %}
 		</div>
 		<p>

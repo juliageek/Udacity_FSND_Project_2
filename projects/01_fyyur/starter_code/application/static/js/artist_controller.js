@@ -1,8 +1,9 @@
-const editVenueForm = document.getElementById('edit-venue-form');
-const deleteButton = document.getElementById('delete-venue');
+const editArtistForm = document.getElementById('edit-artist-form');
+const deleteArtistButton = document.getElementById('delete-artist');
 
-if (editVenueForm) {
- editVenueForm.onsubmit = function(e) {
+if (editArtistForm) {
+ editArtistForm.onsubmit = function(e) {
+   console.log('on edit artist form submit-----');
    e.preventDefault();
    const errors = document.querySelectorAll('.errors');
 
@@ -10,9 +11,9 @@ if (editVenueForm) {
      error.innerHTML = '';
    })
 
-   const venueId = e.target.dataset.id;
+   const artistId = e.target.dataset.id;
    const genreSelect1 = document.getElementById('genres');
-   const selectedOptions1 = Array.from(genreSelect1.options).filter(function(option) {
+   const selectedOptions2 = Array.from(genreSelect1.options).filter(function(option) {
      return option.selected;
    })
    .map(function(option) {
@@ -27,19 +28,18 @@ if (editVenueForm) {
      return option.value;
    })
 
-   fetch(`/venues/${venueId}/edit`, {
+   fetch(`/artists/${artistId}/edit`, {
      method: 'POST',
      body: JSON.stringify({
        'name': document.getElementById('name').value,
        'city': document.getElementById('city').value,
        'state': document.getElementById('state').value,
-       'address': document.getElementById('address').value,
        'phone': document.getElementById('phone').value,
-       'genres': selectedOptions1,
+       'genres': selectedOptions2,
        'image_link': document.getElementById('image_link').value,
        'facebook_link': document.getElementById('facebook_link').value,
        'website': document.getElementById('website').value,
-       'seeking_talent': document.getElementById('seeking_talent').checked,
+       'seeking_venue': document.getElementById('seeking_venue').checked,
        'seeking_description': document.getElementById('seeking_description').value
      }),
      headers: {
@@ -51,7 +51,7 @@ if (editVenueForm) {
    })
    .then(function(text) {
      if (text.message === 'Success') {
-       window.location.replace(`/venues/${venueId}`);
+       window.location.replace(`/artists/${artistId}`);
      } else {
        Object.entries(text.errors).forEach(function ([key, value]) {
          document.getElementById(`${key}_error`).classList.remove('hidden');
@@ -70,11 +70,11 @@ if (editVenueForm) {
  }
 }
 
-if (deleteButton) {
-  deleteButton.onclick = function(e) {
-  const venueId = e.target.dataset.id;
+if (deleteArtistButton) {
+  deleteArtistButton.onclick = function(e) {
+  const artistId = e.target.dataset.id;
 
-  fetch(`/venues/${venueId}`, {
+  fetch(`/artists/${artistId}`, {
     method: 'DELETE'
   })
   .then(function(response) {
@@ -87,3 +87,4 @@ if (deleteButton) {
   })
  }
 }
+

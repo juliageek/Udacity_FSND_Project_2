@@ -3,6 +3,9 @@ const seekingTalent = document.getElementById('seeking_talent');
 const venueForm = document.getElementById('venue-form');
 
 if(seekingTalent) {
+  if (!seekingTalent.checked) {
+    document.getElementById('seeking_description').disabled = true;
+  }
   seekingTalent.onchange = function(e){
     document.getElementById('seeking_description').disabled = !e.target.checked;
   }
