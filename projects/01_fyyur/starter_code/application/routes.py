@@ -28,12 +28,17 @@ def venues():
         state = models.State.query.order_by(desc('state_code'))\
             .with_entities(models.State.state_code)\
             .filter_by(id=area.state)
+
         return {
             'city': area.city,
             'state': state.first()[0],
             'venues': [{
                 'id': venue.id,
-                'name': venue.name
+                'name': venue.name,
+                'num_upcoming_shows': len(models.Show.query
+                                          .filter(models.Show.show_date > date.today(),
+                                                  models.Show.venue_id == venue.id).all()
+                                          )
             } for venue in models.Venue.query.filter_by(state=area.state, city=area.city).all()]
         }
 
