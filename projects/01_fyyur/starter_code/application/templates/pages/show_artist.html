@@ -64,29 +64,39 @@
 <section>
 	<h2 class="monospace">{{ artist.upcoming_shows_count }} Upcoming {% if artist.upcoming_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.upcoming_shows %}
-		<div class="col-sm-4">
-			<div class="tile tile-show">
-				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
-				<h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
+		{% if not artist.upcoming_shows %}
+			<div class="no-shows">There are no upcoming shows</div>
+		{% else %}
+			{%for show in artist.upcoming_shows %}
+			<div class="col-sm-4">
+				<div class="tile tile-show">
+					<img src="{{ show.venue.image_link }}" alt="Show Venue Image" />
+					<h4><a href="/venues/{{ show.venue_id }}">{{ show.venue.name }}</a></h4>
+					<h4>{{ show.show_date|date('full') }}</h4>
+					<h4>{{ show.show_time|time('full') }}</h4>
+				</div>
 			</div>
-		</div>
-		{% endfor %}
+			{% endfor %}
+		{% endif %}
 	</div>
 </section>
 <section>
 	<h2 class="monospace">{{ artist.past_shows_count }} Past {% if artist.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{%for show in artist.past_shows %}
-		<div class="col-sm-4">
-			<div class="tile tile-show">
-				<img src="{{ show.venue_image_link }}" alt="Show Venue Image" />
-				<h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
-				<h6>{{ show.start_time|datetime('full') }}</h6>
-			</div>
-		</div>
-		{% endfor %}
+		{% if not artist.past_shows %}
+			<div class="no-shows">There are no past shows</div>
+			{% else %}
+			{%for show in artist.past_shows %}
+				<div class="col-sm-4">
+					<div class="tile tile-show">
+						<img src="{{ show.venue.image_link }}" alt="Show Venue Image" />
+						<h4><a href="/venues/{{ show.venue.id }}">{{ show.venue.name }}</a></h4>
+						<h4>{{ show.show_date|date('full') }}</h4>
+						<h4>{{ show.show_time|time('full') }}</h4>
+					</div>
+				</div>
+				{% endfor %}
+			{% endif %}
 	</div>
 </section>
 

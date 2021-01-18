@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: 08_add_artist_genre_relationship
-Revises: 07_add_venue_fields_exc_genres
+Revises: 07_add_artist_fields_exc_genres
 Create Date: 2021-01-14 17:05:23.115865
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy.engine.reflection import Inspector
 
 # revision identifiers, used by Alembic.
 revision = '08_add_artist_genre_relationship'
-down_revision = '07_add_venue_fields_exc_genres'
+down_revision = '07_add_artist_fields_exc_genres'
 branch_labels = None
 depends_on = None
 

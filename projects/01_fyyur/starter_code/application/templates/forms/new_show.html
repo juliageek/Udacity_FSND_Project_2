@@ -1,8 +1,8 @@
 {% extends 'layouts/main.html' %}
 {% block title %}New Show Listing{% endblock %}
-{% block content %}
+{% block page_content %}
   <div class="form-wrapper">
-    <form method="post" class="form">
+    <form method="post" class="form" id="show-form">
       <h3 class="form-heading">List a new show</h3>
       <div class="form-group">
         <label for="artist_id">Artist ID</label>
@@ -15,10 +15,14 @@
         {{ form.venue_id(class_ = 'form-control', autofocus = true) }}
       </div>
       <div class="form-group">
-          <label for="start_time">Start Time</label>
-          {{ form.start_time(class_ = 'form-control', placeholder='YYYY-MM-DD HH:MM', autofocus = true) }}
-        </div>
-      <input type="submit" value="Create Venue" class="btn btn-primary btn-lg btn-block">
+        <label for="show_date">Show Date</label>
+        {{ form.show_date(class_ = 'form-control datepicker', autofocus = true, min=current_date) }}
+      </div>
+      <div class="form-group">
+        <label for="show_time">Show Time</label>
+        {{ form.show_time(class_ = 'form-control datepicker', autofocus = true) }}
+      </div>
+      <input type="submit" value="Create Show" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>
 {% endblock %}

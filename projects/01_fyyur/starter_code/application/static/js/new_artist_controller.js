@@ -13,7 +13,6 @@ if(seekingVenue) {
 // create new artist
 if (artistForm) {
   artistForm.onsubmit = function(e) {
-    console.log('venue form on submit')
     e.preventDefault();
     const errors = document.querySelectorAll('.errors');
 

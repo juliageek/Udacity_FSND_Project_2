@@ -52,7 +52,7 @@ if (venueForm) {
       })
       .then(function (text) {
         if (text.message === 'Success') {
-          window.location.reload(true);
+          window.location.replace('/');
         } else {
           Object.entries(text.errors).forEach(function ([key, value]) {
             document.getElementById(`${key}_error`).classList.remove('hidden');

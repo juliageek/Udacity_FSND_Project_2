@@ -65,3 +65,15 @@ class Artist(db.Model):
     seeking_description = db.Column(db.String(120), db.CheckConstraint('seeking_talent=True'))
     genres = db.relationship('Genre', secondary=artist_genres, backref=db.backref('artists', lazy=True))
 
+
+class Show(db.Model):
+    __tablename__ = 'Show'
+
+    id = db.Column(db.Integer, primary_key=True)
+    show_date = db.Column(db.Date)
+    show_time = db.Column(db.Time)
+    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
+    artist = db.relationship('Artist', backref=db.backref('Artist', lazy=True))
+    venue = db.relationship('Venue', backref=db.backref('Venue', lazy=True))
+

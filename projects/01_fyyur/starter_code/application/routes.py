@@ -3,6 +3,7 @@ from flask import flash, redirect, render_template, request, url_for, jsonify, a
 import logging
 from logging import Formatter, FileHandler
 from sqlalchemy import desc, text
+from datetime import date, timedelta, datetime
 
 from . import models
 from . import forms
@@ -60,8 +61,15 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    # shows the venue page with the given venue_id
+    past_shows = models.Show.query.filter(models.Show.show_date < date.today(),
+                                          models.Show.venue_id == venue_id).all()
+
+    upcoming_shows = models.Show.query.filter(models.Show.show_date > date.today(),
+                                              models.Show.venue_id == venue_id).all()
+
     venue_data = models.Venue.query.filter_by(id=venue_id).first()
+    venue_data.past_shows = past_shows
+    venue_data.upcoming_shows = upcoming_shows
 
     return render_template('pages/show_venue.html', venue=venue_data)
 
@@ -142,7 +150,6 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
     data = models.Artist.query.all()
     return render_template('pages/artists.html', artists=data)
 
@@ -163,6 +170,15 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     data = models.Artist.query.filter_by(id=artist_id).first()
+    past_shows = models.Show.query.filter(models.Show.show_date < date.today(),
+                                          models.Show.artist_id == artist_id).all()
+
+    upcoming_shows = models.Show.query.filter(models.Show.show_date > date.today(),
+                                              models.Show.artist_id == artist_id).all()
+
+    data.past_shows = past_shows
+    data.upcoming_shows = upcoming_shows
+
     return render_template('pages/show_artist.html', artist=data)
 
 
@@ -366,66 +382,48 @@ def delete_artist(artist_id):
 
 @app.route('/shows')
 def shows():
-    # displays list of shows at /shows
-    # TODO: replace with real venues data.
-    #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
-        "venue_id": 1,
-        "venue_name": "The Musical Hop",
-        "artist_id": 4,
-        "artist_name": "Guns N Petals",
-        "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-        "start_time": "2019-05-21T21:30:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 5,
-        "artist_name": "Matt Quevedo",
-        "artist_image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-        "start_time": "2019-06-15T23:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-01T20:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-08T20:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-15T20:00:00.000Z"
-    }]
+    data = models.Show.query.filter(models.Show.venue_id == models.Venue.id).all()
+    print('data----', data[0])
     return render_template('pages/shows.html', shows=data)
 
 
 @app.route('/shows/create')
-def create_shows():
+def create_show_form():
     # renders form. do not touch.
     form = forms.ShowForm()
-    return render_template('forms/new_show.html', form=form)
+    current_date = date.today()
+    return render_template('forms/new_show.html', form=form, current_date=current_date)
 
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
-    # called to create new shows in the db, upon submitting new show listing form
-    # TODO: insert form data as a new Show record in the db, instead
+    body = request.get_json()
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+    show = models.Show(
+        artist_id=body['artist_id'],
+        venue_id=body['venue_id'],
+        show_date=body['show_date'],
+        show_time=body['show_time']
+    )
+
+    form = forms.ShowForm(csrf_enabled=False)
+    is_valid = form.validate()
+    response = jsonify({'message': 'Success'})
+    response.headers['Content-Type'] = 'application/json'
+
+    if is_valid:
+        try:
+            db.session.add(show)
+            db.session.commit()
+            flash(f'Show was posted!')
+        except():
+            flash('An error occurred. The show could not be posted.')
+            db.session.rollback()
+        finally:
+            db.session.close()
+    else:
+        response = jsonify({'message': 'Errors', 'errors': form.errors})
+    return response
 
 
 @app.errorhandler(404)

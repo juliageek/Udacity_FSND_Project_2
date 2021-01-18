@@ -179,17 +179,19 @@ h2.monospace {
   opacity: 0.7;
 }
 .shows .tile-show {
-  height: 350px;
+  height: 370px;
 }
 .tile {
   text-align: center;
-  padding: 15px 25px;
+  padding: 0;
   border: solid 1px #ebebeb;
   height: 325px;
   margin-bottom: 15px;
 }
 .tile img {
   max-height: 200px;
+  object-fit: cover;
+  width: 110%;
 }
 .form-wrapper {
   max-width: 400px;
@@ -245,4 +247,7 @@ button > a:hover {
 }
 .buttons-container {
     margin-bottom: 24px;
+}
+.row .no-shows {
+    margin-left: 15px;
 }

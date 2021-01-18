@@ -1,21 +1,29 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, TextAreaField
+from wtforms import StringField, SelectField, SelectMultipleField, BooleanField, TextAreaField, IntegerField
 from wtforms.validators import DataRequired, URL, ValidationError, Regexp, Optional
+from wtforms.fields.html5 import DateField, TimeField
 from . import models
 
 
 class ShowForm(Form):
-    artist_id = StringField(
-        'artist_id'
+    artist_id = IntegerField(
+        'artist_id', validators=[DataRequired()]
     )
-    venue_id = StringField(
-        'venue_id'
+    venue_id = IntegerField(
+        'venue_id', validators=[DataRequired()]
     )
-    start_time = DateTimeField(
-        'start_time',
+    show_date = DateField(
+        'show_date',
         validators=[DataRequired()],
-        default=datetime.today()
+        default=datetime.now(),
+        format='%Y-%m-%d'
+    )
+    show_time = TimeField(
+        'show_time',
+        validators=[DataRequired()],
+        default=datetime.now(),
+        format='%H:%M'
     )
 
 
@@ -119,4 +127,3 @@ class ArtistForm(Form):
         if self.seeking_venue.data is True and seeking_description.data == '':
             raise ValidationError('Enter a short description of what you\'re looking for')
 
-# TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
