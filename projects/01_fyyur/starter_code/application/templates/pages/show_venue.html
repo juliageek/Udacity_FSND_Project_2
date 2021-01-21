@@ -86,8 +86,8 @@
 <section>
 	<h2 class="monospace">{{ venue.past_shows_count }} Past {% if venue.past_shows_count == 1 %}Show{% else %}Shows{% endif %}</h2>
 	<div class="row">
-		{% if not venue.upcoming_shows %}
-			<div class="no-shows">There are no upcoming shows</div>
+		{% if not venue.past_shows %}
+			<div class="no-shows">There are no past shows</div>
 			{% else %}
 				{%for show in venue.past_shows %}
 				<div class="col-sm-4">

@@ -39,7 +39,7 @@ if (editVenueForm) {
        'image_link': document.getElementById('image_link').value,
        'facebook_link': document.getElementById('facebook_link').value,
        'website': document.getElementById('website').value,
-       'seeking_talent': document.getElementById('seeking_talent').checked,
+       'seeking_talent': document.getElementById('seeking').checked,
        'seeking_description': document.getElementById('seeking_description').value
      }),
      headers: {

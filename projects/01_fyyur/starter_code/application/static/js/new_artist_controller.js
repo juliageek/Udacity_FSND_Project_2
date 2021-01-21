@@ -1,14 +1,4 @@
-const seekingVenue = document.getElementById('seeking_venue');
 const artistForm = document.getElementById('artist-form');
-
-if(seekingVenue) {
-  if (!seekingVenue.checked) {
-    document.getElementById('seeking_description').disabled = true;
-  }
-  seekingVenue.onchange = function(e){
-    document.getElementById('seeking_description').disabled = !e.target.checked;
-  }
-}
 
 // create new artist
 if (artistForm) {
@@ -39,7 +29,7 @@ if (artistForm) {
         'genres': selectedOptions,
         'facebook_link': document.getElementById('facebook_link').value,
         'website': document.getElementById('website').value,
-        'seeking_venue': document.getElementById('seeking_venue').checked,
+        'seeking_venue': document.getElementById('seeking').checked,
         'seeking_description': document.getElementById('seeking_description').value
       }),
       headers: {

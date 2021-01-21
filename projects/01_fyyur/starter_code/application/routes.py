@@ -1,9 +1,16 @@
 from flask import current_app as app
-from flask import flash, redirect, render_template, request, url_for, jsonify, abort
+from flask import (
+    abort,
+    flash,
+    jsonify,
+    render_template,
+    request
+)
 import logging
+import sys
 from logging import Formatter, FileHandler
-from sqlalchemy import desc, text
-from datetime import date, timedelta, datetime
+from sqlalchemy import text, exc
+from datetime import date, datetime
 
 from . import models
 from . import forms
@@ -24,29 +31,17 @@ def index():
 
 @app.route('/venues')
 def venues():
-    def venue_info(area):
-        state = models.State.query.order_by(desc('state_code'))\
-            .with_entities(models.State.state_code)\
-            .filter_by(id=area.state)
-
-        return {
+    venues_data = []
+    all_venues = models.Venue.query.all()
+    for area in models.Venue.query.distinct(models.Venue.city, models.Venue.state).all():
+        venues_data.append({
             'city': area.city,
-            'state': state.first()[0],
+            'state': models.State.query.filter_by(id=area.state).first(),
             'venues': [{
                 'id': venue.id,
-                'name': venue.name,
-                'num_upcoming_shows': len(models.Show.query
-                                          .filter(models.Show.show_date > date.today(),
-                                                  models.Show.venue_id == venue.id).all()
-                                          )
-            } for venue in models.Venue.query.filter_by(state=area.state, city=area.city).all()]
-        }
-
-    areas_data = models.Venue.query\
-        .with_entities(models.Venue.state, models.Venue.city)\
-        .group_by(models.Venue.state, models.Venue.city).all()
-
-    venues_data = [venue_info(area) for area in areas_data]
+                'name': venue.name
+            } for venue in all_venues if venue.city == area.city and venue.state == area.state]
+        })
 
     return render_template('pages/venues.html', areas=venues_data)
 
@@ -66,10 +61,11 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    past_shows = models.Show.query.filter(models.Show.show_date < date.today(),
+    venue_shows = models.Show.query.filter(models.Show.venue_id == venue_id).all()
+    past_shows = models.Show.query.filter(models.Show.show_date < datetime.now(),
                                           models.Show.venue_id == venue_id).all()
 
-    upcoming_shows = models.Show.query.filter(models.Show.show_date > date.today(),
+    upcoming_shows = models.Show.query.filter(models.Show.show_date > datetime.now(),
                                               models.Show.venue_id == venue_id).all()
 
     venue_data = models.Venue.query.filter_by(id=venue_id).first()
@@ -95,7 +91,7 @@ def create_venue_submission():
     seeking_description = body['seeking_description']
 
     if not body['seeking_talent']:
-        seeking_description = ''
+        seeking_description = None
 
     venue = models.Venue(
         name=body['name'],
@@ -121,7 +117,8 @@ def create_venue_submission():
             db.session.add(venue)
             db.session.commit()
             flash('Venue was created!')
-        except():
+        except exc.SQLAlchemyError:
+            print(sys.exc_info())
             flash('An error occurred. Venue ' + body['name'] + ' could not be created.')
             db.session.rollback()
         finally:
@@ -139,7 +136,8 @@ def delete_venue(venue_id):
         db.session.delete(venue)
         db.session.commit()
         flash('Venue was deleted!')
-    except():
+    except exc.SQLAlchemyError:
+        print(sys.exc_info())
         db.session.rollback()
         error = True
     finally:
@@ -191,7 +189,7 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = forms.ArtistForm(csrf_enabled=False)
+    form = forms.CreateForm(csrf_enabled=False)
     artist_to_edit = models.Artist.query.filter_by(id=artist_id).first()
 
     artist = {
@@ -207,7 +205,7 @@ def edit_artist(artist_id):
     form.facebook_link.data = artist_to_edit.facebook_link
     form.image_link.data = artist_to_edit.image_link
     form.website.data = artist_to_edit.website
-    form.seeking_venue.data = artist_to_edit.seeking_venue
+    form.seeking.data = artist_to_edit.seeking_venue
     form.seeking_description.data = artist_to_edit.seeking_description
 
     return render_template('forms/edit_artist.html', form=form, artist=artist)
@@ -230,7 +228,7 @@ def edit_artist_submission(artist_id):
     artist.seeking_venue = body['seeking_venue']
     artist.seeking_description = body['seeking_description']
 
-    form = forms.ArtistForm(csrf_enabled=False)
+    form = forms.CreateForm(csrf_enabled=False)
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'
@@ -239,7 +237,8 @@ def edit_artist_submission(artist_id):
         try:
             db.session.commit()
             flash(f'Venue {artist.name} was successfully updated!')
-        except IndexError:
+        except exc.SQLAlchemyError:
+            print(sys.exc_info())
             flash('An error occurred. Venue ' + body['name'] + ' could not be updated .')
             db.session.rollback()
         finally:
@@ -268,7 +267,7 @@ def edit_venue(venue_id):
     form.facebook_link.data = venue_to_edit.facebook_link
     form.image_link.data = venue_to_edit.image_link
     form.website.data = venue_to_edit.website
-    form.seeking_talent.data = venue_to_edit.seeking_talent
+    form.seeking.data = venue_to_edit.seeking_talent
     form.seeking_description.data = venue_to_edit.seeking_description
 
     return render_template('forms/edit_venue.html', form=form, venue=venue)
@@ -301,7 +300,8 @@ def edit_venue_submission(venue_id):
         try:
             db.session.commit()
             flash(f'Venue {venue.name} was successfully updated!')
-        except IndexError:
+        except exc.SQLAlchemyError:
+            print(sys.exc_info())
             flash('An error occurred. Venue ' + body['name'] + ' could not be updated .')
             db.session.rollback()
         finally:
@@ -316,7 +316,7 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
-    form = forms.ArtistForm()
+    form = forms.CreateForm()
     return render_template('forms/new_artist.html', form=form)
 
 
@@ -342,7 +342,7 @@ def create_artist_submission():
         genres=genres
     )
 
-    form = forms.ArtistForm(csrf_enabled=False)
+    form = forms.CreateForm(csrf_enabled=False)
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'
@@ -352,7 +352,8 @@ def create_artist_submission():
             db.session.add(artist)
             db.session.commit()
             flash(f'Artist {artist.name} was created!')
-        except():
+        except exc.SQLAlchemyError:
+            print(sys.exc_info())
             flash('An error occurred. Venue ' + body['name'] + ' could not be created.')
             db.session.rollback()
         finally:
@@ -370,7 +371,8 @@ def delete_artist(artist_id):
         db.session.delete(venue)
         db.session.commit()
         flash('Artist was deleted!')
-    except():
+    except exc.SQLAlchemyError:
+        print(sys.exc_info())
         db.session.rollback()
         error = True
     finally:
@@ -388,7 +390,6 @@ def delete_artist(artist_id):
 @app.route('/shows')
 def shows():
     data = models.Show.query.filter(models.Show.venue_id == models.Venue.id).all()
-    print('data----', data[0])
     return render_template('pages/shows.html', shows=data)
 
 
@@ -396,7 +397,7 @@ def shows():
 def create_show_form():
     # renders form. do not touch.
     form = forms.ShowForm()
-    current_date = date.today()
+    current_date = datetime.now()
     return render_template('forms/new_show.html', form=form, current_date=current_date)
 
 
@@ -421,7 +422,8 @@ def create_show_submission():
             db.session.add(show)
             db.session.commit()
             flash(f'Show was posted!')
-        except():
+        except exc.SQLAlchemyError:
+            print(sys.exc_info())
             flash('An error occurred. The show could not be posted.')
             db.session.rollback()
         finally:
@@ -431,9 +433,45 @@ def create_show_submission():
     return response
 
 
+@app.errorhandler(400)
+def not_found_error(error):
+    flash('[Error 400] - Bad request', 'error')
+    return render_template('/'), 400
+
+
+@app.errorhandler(401)
+def not_found_error(error):
+    flash('[Error 401 Unauthorized] - You\'re not authorized to make this request', 'error')
+    return render_template('/'), 401
+
+
+@app.errorhandler(403)
+def not_found_error(error):
+    flash('[Error 403 Forbidden]', 'error')
+    return render_template('/'), 403
+
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('errors/404.html'), 404
+
+
+@app.errorhandler(405)
+def not_found_error(error):
+    flash('[Error 405 Invalid method]', 'error')
+    return render_template('/'), 405
+
+
+@app.errorhandler(409)
+def not_found_error(error):
+    flash('[Error 409 Duplicate resource]', 'error')
+    return render_template('/'), 405
+
+
+@app.errorhandler(422)
+def not_found_error(error):
+    flash('[Error 422 Not processable] - The server could not process the request', 'error')
+    return render_template('/'), 422
 
 
 @app.errorhandler(500)

@@ -26,8 +26,8 @@ def upgrade():
         op.create_table('artist_genres',
         sa.Column('genre_id', sa.Integer(), nullable=False),
         sa.Column('artist_id', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['genre_id'], ['Genre.id'], ),
-        sa.ForeignKeyConstraint(['artist_id'], ['Artist.id'], ),
+        sa.ForeignKeyConstraint(['genre_id'], ['genres.id'], ),
+        sa.ForeignKeyConstraint(['artist_id'], ['artists.id'], ),
         sa.PrimaryKeyConstraint('genre_id', 'artist_id')
         )
     # ### end Alembic commands ###

@@ -1,12 +1,12 @@
 // enable and disable the seeking description text area depending on whether the seeking talent box is checked or not
-const seekingTalent = document.getElementById('seeking_talent');
+const seeking = document.getElementById('seeking');
 const venueForm = document.getElementById('venue-form');
 
-if(seekingTalent) {
-  if (!seekingTalent.checked) {
+if(seeking) {
+  if (!seeking.checked) {
     document.getElementById('seeking_description').disabled = true;
   }
-  seekingTalent.onchange = function(e){
+  seeking.onchange = function(e){
     document.getElementById('seeking_description').disabled = !e.target.checked;
   }
 }
@@ -26,7 +26,7 @@ if (venueForm) {
         return option.selected;
       })
       .map(function(option) {
-        return option.value;
+        return parseInt(option.value);
       })
       fetch('/venues/create', {
         method: 'POST',
@@ -40,7 +40,7 @@ if (venueForm) {
           'genres': selectedOptions,
           'facebook_link': document.getElementById('facebook_link').value,
           'website': document.getElementById('website').value,
-          'seeking_talent': document.getElementById('seeking_talent').checked,
+          'seeking_talent': document.getElementById('seeking').checked,
           'seeking_description': document.getElementById('seeking_description').value
         }),
         headers: {

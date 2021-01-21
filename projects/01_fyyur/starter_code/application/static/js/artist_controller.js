@@ -3,7 +3,6 @@ const deleteArtistButton = document.getElementById('delete-artist');
 
 if (editArtistForm) {
  editArtistForm.onsubmit = function(e) {
-   console.log('on edit artist form submit-----');
    e.preventDefault();
    const errors = document.querySelectorAll('.errors');
 
@@ -39,7 +38,7 @@ if (editArtistForm) {
        'image_link': document.getElementById('image_link').value,
        'facebook_link': document.getElementById('facebook_link').value,
        'website': document.getElementById('website').value,
-       'seeking_venue': document.getElementById('seeking_venue').checked,
+       'seeking_venue': document.getElementById('seeking').checked,
        'seeking_description': document.getElementById('seeking_description').value
      }),
      headers: {
