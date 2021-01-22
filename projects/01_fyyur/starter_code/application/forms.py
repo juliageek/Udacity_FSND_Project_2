@@ -28,7 +28,7 @@ class ShowForm(FlaskForm):
     )
 
 
-class CreateForm(Form):
+class CreateForm(FlaskForm):
     name = StringField(
         'name', validators=[DataRequired()]
     )
@@ -36,8 +36,7 @@ class CreateForm(Form):
         'city', validators=[DataRequired()]
     )
     state = SelectField(
-        'state', validators=[DataRequired()],
-        choices=[(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+        'state', validators=[DataRequired()], coerce=int
     )
     phone = StringField(
         'phone', validators=[DataRequired()]
@@ -46,9 +45,7 @@ class CreateForm(Form):
         'image_link'
     )
     genres = SelectMultipleField(
-        'genres', validators=[DataRequired()],
-        coerce=int,
-        choices=[(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+        'genres', validators=[DataRequired()], coerce=int
     )
     facebook_link = StringField(
         # TODO implement enum restriction
@@ -75,7 +72,7 @@ class CreateForm(Form):
             raise ValidationError('Enter a valid prefix phone number')
 
     def validate_seeking_description(self, seeking_description):
-        if self.seeking and seeking_description.data == '':
+        if self.seeking is True and seeking_description.data == '':
             raise ValidationError('Enter a short description of what you\'re looking for')
 
 

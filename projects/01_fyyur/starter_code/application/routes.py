@@ -81,6 +81,10 @@ def show_venue(venue_id):
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
     form = forms.VenueForm()
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
     return render_template('forms/new_venue.html', form=form)
 
 
@@ -108,6 +112,10 @@ def create_venue_submission():
     )
 
     form = forms.VenueForm(csrf_enabled=False)
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'
@@ -190,7 +198,12 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
     form = forms.CreateForm(csrf_enabled=False)
+
     artist_to_edit = models.Artist.query.filter_by(id=artist_id).first()
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
 
     artist = {
         "id": artist_to_edit.id,
@@ -199,7 +212,6 @@ def edit_artist(artist_id):
 
     form.name.data = artist_to_edit.name
     form.city.data = artist_to_edit.city
-    form.state.data = artist_to_edit.state
     form.genres.data = [x.id for x in artist_to_edit.genres]
     form.phone.data = artist_to_edit.phone
     form.facebook_link.data = artist_to_edit.facebook_link
@@ -207,6 +219,8 @@ def edit_artist(artist_id):
     form.website.data = artist_to_edit.website
     form.seeking.data = artist_to_edit.seeking_venue
     form.seeking_description.data = artist_to_edit.seeking_description
+
+    form.state.process_data(artist_to_edit.state)
 
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -229,6 +243,11 @@ def edit_artist_submission(artist_id):
     artist.seeking_description = body['seeking_description']
 
     form = forms.CreateForm(csrf_enabled=False)
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
+
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'
@@ -250,7 +269,6 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    form = forms.VenueForm(csrf_enabled=False)
     venue_to_edit = models.Venue.query.filter_by(id=venue_id).first()
 
     venue = {
@@ -258,9 +276,14 @@ def edit_venue(venue_id):
         "name": venue_to_edit.name
     }
 
+    form = forms.VenueForm(csrf_enabled=False, state=venue_to_edit.state)
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
+
     form.name.data = venue_to_edit.name
     form.city.data = venue_to_edit.city
-    form.state.data = venue_to_edit.state
     form.genres.data = [x.id for x in venue_to_edit.genres]
     form.address.data = venue_to_edit.address
     form.phone.data = venue_to_edit.phone
@@ -269,6 +292,8 @@ def edit_venue(venue_id):
     form.website.data = venue_to_edit.website
     form.seeking.data = venue_to_edit.seeking_talent
     form.seeking_description.data = venue_to_edit.seeking_description
+
+    form.state.process_data(venue_to_edit.state)
 
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -292,6 +317,11 @@ def edit_venue_submission(venue_id):
     venue.seeking_description = body['seeking_description']
 
     form = forms.VenueForm(csrf_enabled=False)
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
+
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'
@@ -317,6 +347,11 @@ def edit_venue_submission(venue_id):
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
     form = forms.CreateForm()
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
+
     return render_template('forms/new_artist.html', form=form)
 
 
@@ -343,6 +378,11 @@ def create_artist_submission():
     )
 
     form = forms.CreateForm(csrf_enabled=False)
+    states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
+    genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
+    form.state.choices = states_list
+    form.genres.choices = genres_list
+
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
     response.headers['Content-Type'] = 'application/json'

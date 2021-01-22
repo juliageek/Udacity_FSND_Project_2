@@ -15,7 +15,7 @@ if (artistForm) {
       return option.selected;
     })
     .map(function(option) {
-      return option.value;
+      return parseInt(option.value);
     })
 
     fetch('/artists/create', {
