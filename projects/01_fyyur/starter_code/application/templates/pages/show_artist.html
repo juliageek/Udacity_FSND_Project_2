@@ -72,8 +72,7 @@
 				<div class="tile tile-show">
 					<img src="{{ show.venue.image_link }}" alt="Show Venue Image" />
 					<h4><a href="/venues/{{ show.venue_id }}">{{ show.venue.name }}</a></h4>
-					<h4>{{ show.show_date|date('full') }}</h4>
-					<h4>{{ show.show_time|time('full') }}</h4>
+					<h4>{{ show.show_datetime|datetime('full') }}</h4>
 				</div>
 			</div>
 			{% endfor %}
@@ -91,8 +90,26 @@
 					<div class="tile tile-show">
 						<img src="{{ show.venue.image_link }}" alt="Show Venue Image" />
 						<h4><a href="/venues/{{ show.venue.id }}">{{ show.venue.name }}</a></h4>
-						<h4>{{ show.show_date|date('full') }}</h4>
-						<h4>{{ show.show_time|time('full') }}</h4>
+						<h4>{{ show.show_datetime|datetime('full') }}</h4>
+					</div>
+				</div>
+				{% endfor %}
+			{% endif %}
+	</div>
+</section>
+<section>
+	<h2 class="monospace">Venues Performed</h2>
+	<div class="row">
+		{% if not artist.venues_performed %}
+			<div class="no-shows">The artist didn't perform at any venues yet</div>
+			{% else %}
+			{%for venue in artist.venues_performed %}
+				<div class="col-sm-4">
+					<div class="tile tile-show">
+						<img src="{{ venue.image_link }}" alt="Show Venue Image" />
+						<h4><a href="/venues/{{ venue.id }}">{{ venue.name }}</a></h4>
+						<h4>{{ venue.address }}</h4>
+						<h5>{{ venue.city }}, {{ venue.state }}</h5>
 					</div>
 				</div>
 				{% endfor %}

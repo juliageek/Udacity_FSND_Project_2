@@ -179,18 +179,19 @@ h2.monospace {
   opacity: 0.7;
 }
 .shows .tile-show {
-  height: 370px;
+  height: 330px;
 }
 .tile {
   text-align: center;
   padding: 0;
   border: solid 1px #ebebeb;
-  height: 325px;
+  height: 300px;
   margin-bottom: 15px;
 }
 .tile img {
-  max-height: 200px;
+  height: 200px;
   object-fit: cover;
+  object-position: top;
   width: 110%;
 }
 .form-wrapper {

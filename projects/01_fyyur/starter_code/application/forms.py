@@ -28,15 +28,15 @@ class ShowForm(FlaskForm):
     )
 
 
-class CreateForm(FlaskForm):
+class BasicForm(FlaskForm):
     name = StringField(
         'name', validators=[DataRequired()]
     )
     city = StringField(
         'city', validators=[DataRequired()]
     )
-    state = SelectField(
-        'state', validators=[DataRequired()], coerce=int
+    state_id = SelectField(
+        'state_id', validators=[DataRequired()]
     )
     phone = StringField(
         'phone', validators=[DataRequired()]
@@ -48,7 +48,6 @@ class CreateForm(FlaskForm):
         'genres', validators=[DataRequired()], coerce=int
     )
     facebook_link = StringField(
-        # TODO implement enum restriction
         'facebook_link', validators=[Optional(), URL()]
     )
     website = StringField(
@@ -67,14 +66,31 @@ class CreateForm(FlaskForm):
         if not match:
             raise ValidationError('Error, phone number must be in format xxx-xxx-xxxx')
 
-        phone_prefixes = [x.prefix for x in models.Phone.query.filter_by(state=self.state.data).all()]
+        phone_prefixes = [x.prefix for x in models.Phone.query.filter_by(state=self.state_id.data).all()]
         if int(phone.data[:3]) not in phone_prefixes:
             raise ValidationError('Enter a valid prefix phone number')
 
     def validate_seeking_description(self, seeking_description):
-        if self.seeking is True and seeking_description.data == '':
+        if self.seeking.data is True and seeking_description.data == '':
             raise ValidationError('Enter a short description of what you\'re looking for')
 
 
-class VenueForm(CreateForm):
+class VenueForm(BasicForm):
     address = StringField('address', validators=[DataRequired()])
+    seeking_talent = BooleanField(
+        'seeking_talent', render_kw={'checked': False}
+    )
+
+    def validate_seeking_description(self, seeking_description):
+        if self.seeking_talent.data is True and seeking_description.data == '':
+            raise ValidationError('Enter a short description of what you\'re looking for')
+
+
+class ArtistForm(BasicForm):
+    seeking_venue = BooleanField(
+        'seeking_venue', render_kw={'checked': False}
+    )
+
+    def validate_seeking_description(self, seeking_description):
+        if self.seeking_venue.data is True and seeking_description.data == '':
+            raise ValidationError('Enter a short description of what you\'re looking for')

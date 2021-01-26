@@ -9,8 +9,8 @@ from flask import (
 import logging
 import sys
 from logging import Formatter, FileHandler
-from sqlalchemy import text, exc
-from datetime import date, datetime
+from sqlalchemy import text, exc, and_
+from datetime import datetime, date
 
 from . import models
 from . import forms
@@ -33,14 +33,14 @@ def index():
 def venues():
     venues_data = []
     all_venues = models.Venue.query.all()
-    for area in models.Venue.query.distinct(models.Venue.city, models.Venue.state).all():
+    for area in models.Venue.query.distinct(models.Venue.city, models.Venue.state_id).all():
         venues_data.append({
             'city': area.city,
-            'state': models.State.query.filter_by(id=area.state).first(),
+            'state': models.State.query.filter_by(id=area.state_id).first(),
             'venues': [{
                 'id': venue.id,
                 'name': venue.name
-            } for venue in all_venues if venue.city == area.city and venue.state == area.state]
+            } for venue in all_venues if venue.city == area.city and venue.state_id == area.state_id]
         })
 
     return render_template('pages/venues.html', areas=venues_data)
@@ -61,16 +61,29 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    venue_shows = models.Show.query.filter(models.Show.venue_id == venue_id).all()
-    past_shows = models.Show.query.filter(models.Show.show_date < datetime.now(),
+    upcoming_shows = models.Show.query.filter(models.Show.show_datetime > datetime.now(),
+                                              models.Show.venue_id == venue_id).all()
+
+    past_shows = models.Show.query.filter(models.Show.show_datetime < datetime.now(),
                                           models.Show.venue_id == venue_id).all()
 
-    upcoming_shows = models.Show.query.filter(models.Show.show_date > datetime.now(),
-                                              models.Show.venue_id == venue_id).all()
+    past_performers = db.session.query(models.Artist)\
+        .join(models.Show, and_(models.Show.artist_id == models.Artist.id,
+                                models.Show.show_datetime < datetime.now(),
+                                models.Show.venue_id == venue_id))\
+        .all()
 
     venue_data = models.Venue.query.filter_by(id=venue_id).first()
     venue_data.past_shows = past_shows
+
+    venue_data.past_performers = [{
+        "id": artist.id,
+        "name": artist.name,
+        "image_link": artist.image_link
+    } for artist in past_performers]
     venue_data.upcoming_shows = upcoming_shows
+    venue_data.past_shows_count = len(past_shows)
+    venue_data.upcoming_shows_count = len(upcoming_shows)
 
     return render_template('pages/show_venue.html', venue=venue_data)
 
@@ -83,7 +96,7 @@ def create_venue_form():
     form = forms.VenueForm()
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
     return render_template('forms/new_venue.html', form=form)
 
@@ -100,7 +113,7 @@ def create_venue_submission():
     venue = models.Venue(
         name=body['name'],
         city=body['city'],
-        state=body['state'],
+        state_id=body['state_id'],
         address=body['address'],
         phone=body['phone'],
         image_link=body['image_link'],
@@ -114,7 +127,7 @@ def create_venue_submission():
     form = forms.VenueForm(csrf_enabled=False)
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
     is_valid = form.validate()
     response = jsonify({'message': 'Success'})
@@ -181,14 +194,31 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     data = models.Artist.query.filter_by(id=artist_id).first()
-    past_shows = models.Show.query.filter(models.Show.show_date < date.today(),
+    past_shows = models.Show.query.filter(models.Show.show_datetime < datetime.now(),
                                           models.Show.artist_id == artist_id).all()
 
-    upcoming_shows = models.Show.query.filter(models.Show.show_date > date.today(),
+    upcoming_shows = models.Show.query.filter(models.Show.show_datetime > datetime.now(),
                                               models.Show.artist_id == artist_id).all()
 
+    venues_performed = db.session.query(models.Venue, models.State)\
+        .join(models.Show, and_(models.Show.artist_id == artist_id,
+              models.Show.venue_id == models.Venue.id,
+              models.Show.show_datetime < datetime.now()))\
+        .join(models.State, models.Venue.state_id == models.State.id)\
+        .all()
+
     data.past_shows = past_shows
+    data.past_shows_count = len(past_shows)
     data.upcoming_shows = upcoming_shows
+    data.venues_performed = [{
+        "id": venue.id,
+        "name": venue.name,
+        "address": venue.address,
+        "state": state.state_code,
+        "city": venue.city,
+        "image_link": venue.image_link,
+    } for venue, state in venues_performed]
+    data.upcoming_shows_count = len(upcoming_shows)
 
     return render_template('pages/show_artist.html', artist=data)
 
@@ -197,12 +227,12 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = forms.CreateForm(csrf_enabled=False)
+    form = forms.ArtistForm(csrf_enabled=False)
 
     artist_to_edit = models.Artist.query.filter_by(id=artist_id).first()
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     artist = {
@@ -220,7 +250,7 @@ def edit_artist(artist_id):
     form.seeking.data = artist_to_edit.seeking_venue
     form.seeking_description.data = artist_to_edit.seeking_description
 
-    form.state.process_data(artist_to_edit.state)
+    form.state_id.process_data(artist_to_edit.state_id)
 
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -234,7 +264,7 @@ def edit_artist_submission(artist_id):
     artist.name = body['name']
     artist.city = body['city']
     artist.phone = body['phone']
-    artist.state = body['state']
+    artist.state_id = body['state_id']
     artist.image_link = body['image_link']
     artist.facebook_link = body['facebook_link']
     artist.genres = genres_to_save
@@ -242,10 +272,10 @@ def edit_artist_submission(artist_id):
     artist.seeking_venue = body['seeking_venue']
     artist.seeking_description = body['seeking_description']
 
-    form = forms.CreateForm(csrf_enabled=False)
+    form = forms.ArtistForm(csrf_enabled=False)
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     is_valid = form.validate()
@@ -276,10 +306,10 @@ def edit_venue(venue_id):
         "name": venue_to_edit.name
     }
 
-    form = forms.VenueForm(csrf_enabled=False, state=venue_to_edit.state)
+    form = forms.VenueForm(csrf_enabled=False, state=venue_to_edit.state_id)
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     form.name.data = venue_to_edit.name
@@ -290,10 +320,10 @@ def edit_venue(venue_id):
     form.facebook_link.data = venue_to_edit.facebook_link
     form.image_link.data = venue_to_edit.image_link
     form.website.data = venue_to_edit.website
-    form.seeking.data = venue_to_edit.seeking_talent
+    form.seeking_talent.data = venue_to_edit.seeking_talent
     form.seeking_description.data = venue_to_edit.seeking_description
 
-    form.state.process_data(venue_to_edit.state)
+    form.state_id.process_data(venue_to_edit.state_id)
 
     return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -307,7 +337,7 @@ def edit_venue_submission(venue_id):
     venue.name = body['name']
     venue.city = body['city']
     venue.phone = body['phone']
-    venue.state = body['state']
+    venue.state_id = body['state_id']
     venue.address = body['address']
     venue.image_link = body['image_link']
     venue.facebook_link = body['facebook_link']
@@ -319,7 +349,7 @@ def edit_venue_submission(venue_id):
     form = forms.VenueForm(csrf_enabled=False)
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     is_valid = form.validate()
@@ -346,10 +376,10 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
-    form = forms.CreateForm()
+    form = forms.ArtistForm()
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     return render_template('forms/new_artist.html', form=form)
@@ -367,7 +397,7 @@ def create_artist_submission():
     artist = models.Artist(
         name=body['name'],
         city=body['city'],
-        state=body['state'],
+        state_id=body['state_id'],
         phone=body['phone'],
         image_link=body['image_link'],
         facebook_link=body['facebook_link'],
@@ -377,10 +407,10 @@ def create_artist_submission():
         genres=genres
     )
 
-    form = forms.CreateForm(csrf_enabled=False)
+    form = forms.ArtistForm(csrf_enabled=False)
     states_list = [(x.id, x.state_code) for x in models.State.query.order_by('state_code').all()]
     genres_list = [(x.id, x.name) for x in models.Genre.query.order_by('name').all()]
-    form.state.choices = states_list
+    form.state_id.choices = states_list
     form.genres.choices = genres_list
 
     is_valid = form.validate()
@@ -437,7 +467,7 @@ def shows():
 def create_show_form():
     # renders form. do not touch.
     form = forms.ShowForm()
-    current_date = datetime.now()
+    current_date = date.today()
     return render_template('forms/new_show.html', form=form, current_date=current_date)
 
 
@@ -445,11 +475,14 @@ def create_show_form():
 def create_show_submission():
     body = request.get_json()
 
+    str_to_date = datetime.strptime(body['show_date'], '%Y-%m-%d')
+    str_to_time = datetime.strptime(body['show_time'], '%H:%M').time()
+    combined_date_time = datetime.combine(str_to_date, str_to_time)
+
     show = models.Show(
         artist_id=body['artist_id'],
         venue_id=body['venue_id'],
-        show_date=body['show_date'],
-        show_time=body['show_time']
+        show_datetime=combined_date_time
     )
 
     form = forms.ShowForm(csrf_enabled=False)

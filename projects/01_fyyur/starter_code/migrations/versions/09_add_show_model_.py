@@ -25,8 +25,7 @@ def upgrade():
     if 'shows' not in tables:
         op.create_table('shows',
                         sa.Column('artist_id', sa.Integer(), nullable=False),
-                        sa.Column('date', sa.Date(), nullable=True),
-                        sa.Column('time', sa.Time(), nullable=True),
+                        sa.Column('show_datetime', sa.DateTime(), nullable=True),
                         sa.ForeignKeyConstraint(['artist_id'], ['artists.id'], ),
                         sa.ForeignKeyConstraint(['venue_id'], ['venues.id']),
                         sa.PrimaryKeyConstraint('id')

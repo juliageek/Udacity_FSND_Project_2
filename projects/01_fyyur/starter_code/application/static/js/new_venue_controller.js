@@ -1,12 +1,12 @@
 // enable and disable the seeking description text area depending on whether the seeking talent box is checked or not
-const seeking = document.getElementById('seeking');
+const seekingTalent = document.getElementById('seeking_talent');
 const venueForm = document.getElementById('venue-form');
 
-if(seeking) {
-  if (!seeking.checked) {
+if(seekingTalent) {
+  if (!seekingTalent.checked) {
     document.getElementById('seeking_description').disabled = true;
   }
-  seeking.onchange = function(e){
+  seekingTalent.onchange = function(e){
     document.getElementById('seeking_description').disabled = !e.target.checked;
   }
 }
@@ -33,14 +33,14 @@ if (venueForm) {
         body: JSON.stringify({
           'name': document.getElementById('name').value,
           'city': document.getElementById('city').value,
-          'state': document.getElementById('state').value,
+          'state_id': document.getElementById('state_id').value,
           'address': document.getElementById('address').value,
           'phone': document.getElementById('phone').value,
           'image_link': document.getElementById('image_link').value,
           'genres': selectedOptions,
           'facebook_link': document.getElementById('facebook_link').value,
           'website': document.getElementById('website').value,
-          'seeking_talent': document.getElementById('seeking').checked,
+          'seeking_talent': document.getElementById('seeking_talent').checked,
           'seeking_description': document.getElementById('seeking_description').value
         }),
         headers: {

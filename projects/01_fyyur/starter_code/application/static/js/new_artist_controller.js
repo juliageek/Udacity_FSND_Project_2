@@ -1,5 +1,14 @@
 const artistForm = document.getElementById('artist-form');
+const seekingVenue = document.getElementById('seeking_venue');
 
+if(seekingVenue) {
+  if (!seekingVenue.checked) {
+    document.getElementById('seeking_description').disabled = true;
+  }
+  seekingVenue.onchange = function(e){
+    document.getElementById('seeking_description').disabled = !e.target.checked;
+  }
+}
 // create new artist
 if (artistForm) {
   artistForm.onsubmit = function(e) {
@@ -23,13 +32,13 @@ if (artistForm) {
       body: JSON.stringify({
         'name': document.getElementById('name').value,
         'city': document.getElementById('city').value,
-        'state': document.getElementById('state').value,
+        'state_id': document.getElementById('state_id').value,
         'phone': document.getElementById('phone').value,
         'image_link': document.getElementById('image_link').value,
         'genres': selectedOptions,
         'facebook_link': document.getElementById('facebook_link').value,
         'website': document.getElementById('website').value,
-        'seeking_venue': document.getElementById('seeking').checked,
+        'seeking_venue': document.getElementById('seeking_venue').checked,
         'seeking_description': document.getElementById('seeking_description').value
       }),
       headers: {

@@ -75,8 +75,7 @@
 				<div class="tile tile-show">
 					<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
 					<h4><a href="/artists/{{ show.artist.id }}">{{ show.artist.name }}</a></h4>
-					<h4>{{ show.show_date|date('full') }}</h4>
-					<h4>{{ show.show_time|time('full') }}</h4>
+					<h4>{{ show.show_datetime|datetime('full') }}</h4>
 				</div>
 			</div>
 			{% endfor %}
@@ -94,9 +93,22 @@
 					<div class="tile tile-show">
 						<img src="{{ show.artist.image_link }}" alt="Show Artist Image" />
 						<h4><a href="/artists/{{ show.artist.id }}">{{ show.artist.name }}</a></h4>
-						<h4>{{ show.show_date|date('full') }}</h4>
-						<h4>{{ show.show_time|time('full') }}</h4>
+						<h4>{{ show.show_datetime|datetime('full') }}</h4>
 					</div>
+				</div>
+				{% endfor %}
+		{% endif %}
+	</div>
+</section>
+<section>
+	<h2 class="monospace">Past Performers</h2>
+	<div class="row">
+		{% if not venue.past_performers %}
+			<div class="no-shows">There are no past performers</div>
+			{% else %}
+				{%for artist in venue.past_performers %}
+				<div class="no-shows">
+					<h4><a href="/artists/{{ artist.id }}">{{ artist.name }}</a></h4>
 				</div>
 				{% endfor %}
 		{% endif %}

@@ -17,7 +17,7 @@ class Venue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
@@ -56,7 +56,7 @@ class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
     phone = db.Column(db.String(120))
     website = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
@@ -70,8 +70,7 @@ class Show(db.Model):
     __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    show_date = db.Column(db.Date)
-    show_time = db.Column(db.Time)
+    show_datetime = db.Column(db.DateTime)
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     venue_id = db.Column(db.Integer, db.ForeignKey('venues.id'), nullable=False)
     artist = db.relationship('Artist', backref=db.backref('artists', lazy=True))

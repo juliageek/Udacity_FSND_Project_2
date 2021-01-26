@@ -9,7 +9,7 @@ DEBUG = True
 
 class DatabaseURI:
     # Just change the names of your database and credentials and all to connect to your local system
-    DATABASE_NAME = 'fyyur'
+    DATABASE_NAME = 'fyyur2'
     username = 'postgres'
     password = 'postgres'
     url = 'localhost:5432'

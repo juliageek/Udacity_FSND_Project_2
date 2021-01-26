@@ -32,13 +32,13 @@ if (editArtistForm) {
      body: JSON.stringify({
        'name': document.getElementById('name').value,
        'city': document.getElementById('city').value,
-       'state': document.getElementById('state').value,
+       'state_id': document.getElementById('state_id').value,
        'phone': document.getElementById('phone').value,
        'genres': selectedOptions2,
        'image_link': document.getElementById('image_link').value,
        'facebook_link': document.getElementById('facebook_link').value,
        'website': document.getElementById('website').value,
-       'seeking_venue': document.getElementById('seeking').checked,
+       'seeking_venue': document.getElementById('seeking_venue').checked,
        'seeking_description': document.getElementById('seeking_description').value
      }),
      headers: {
