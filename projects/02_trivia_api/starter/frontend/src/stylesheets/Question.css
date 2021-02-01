@@ -3,15 +3,6 @@
   flex-direction: row;
 }
 
-.categories-list {
-  flex-basis: 25%;
-  flex-shrink: 2;
-}
-
-.categories-list > form {
-  width: 60%;
-}
-
 .questions-list {
   flex-basis: 75%;
   text-align: center;
@@ -60,6 +51,7 @@ span.page-num {
   font-weight: bolder;
   text-decoration: underline;
   font-size: 16px;
+  cursor: pointer;
 }
 
 span.page-num.active {
