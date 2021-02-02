@@ -126,6 +126,63 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(data['current_category']['id'], 1)
         self.assertEqual(data['current_category']['type'], 'Science')
 
+    def test_create_new_question(self):
+        """Test creating a new question"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        questions = Question.query.all()
+
+        new_question = {
+            'question': 'What is the most populous city in the world?',
+            'answer': 'Tokyo',
+            'difficulty': 2,
+            'category': 3
+        }
+
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertTrue(data['success'])
+        self.assertTrue(['current_questions'])
+        self.assertEqual(data['total_questions'], len(questions)+1)
+        self.assertEqual(data['created'], 23)
+
+    def test_create_new_question_no_question_error(self):
+        """Test error response when attempting to create a new question
+        without sending the question in the request"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        new_question = {
+            'question': '',
+            'answer': 'Marie Curie',
+            'category': 1,
+            'difficulty': 1
+        }
+
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
+
+    def test_create_new_question_no_answer_error(self):
+        """Test error response when attempting to create a new question
+        without sending the answer in the request"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        new_question = {
+            'question': 'What is the most populous city in the world?',
+            'answer': '',
+            'category': 3,
+            'difficulty': 1
+        }
+
+        res = self.client().post('/questions', json=new_question)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 400)
+
 
 if __name__ == "__main__":
     unittest.main()

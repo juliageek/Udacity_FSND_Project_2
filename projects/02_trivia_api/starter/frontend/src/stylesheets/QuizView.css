@@ -52,6 +52,17 @@
     color: white;
     padding: 8px;
     border-radius: 4px;
+    font-size: 1rem;
+    border: none;
+}
+
+.button:focus, .button:active {
+    outline: none;
+    box-shadow: 0;
+}
+
+.button:hover {
+    background-color: blue;
 }
 
 div.button {

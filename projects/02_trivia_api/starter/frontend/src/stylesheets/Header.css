@@ -1,6 +1,5 @@
 .app-logo {
-  animation: App-logo-spin infinite 20s linear;
-  pointer-events: none;
+  animation: app-logo-spin 0.4s linear;
   color: dodgerblue;
   font-weight: bold;
   cursor: pointer;
@@ -21,4 +20,14 @@
 .header-link {
    cursor: pointer;
    padding: 0 2rem;
+}
+
+@keyframes app-logo-spin {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+     transform: scale(1.2);
+  }
 }

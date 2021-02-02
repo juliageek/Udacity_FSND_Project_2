@@ -11,13 +11,13 @@ class FormView extends Component {
       answer: "",
       difficulty: 1,
       category: 1,
-      categories: {}
+      categories: []
     }
   }
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `/categories`,
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -34,7 +34,7 @@ class FormView extends Component {
   submitQuestion = (event) => {
     event.preventDefault();
     $.ajax({
-      url: '/questions', //TODO: update request URL
+      url: '/questions',
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -53,7 +53,7 @@ class FormView extends Component {
         return;
       },
       error: (error) => {
-        alert('Unable to add question. Please try your request again')
+        alert('Unable to add question. Please try again!')
         return;
       }
     })
@@ -65,8 +65,8 @@ class FormView extends Component {
 
   render() {
     return (
-      <div id="add-form">
-        <h2>Add a New Trivia Question</h2>
+      <div className="add-form">
+        <div className="form-title">Add a New Trivia Question</div>
         <form className="form-view" id="add-question-form" onSubmit={this.submitQuestion}>
           <label>
             Question
@@ -89,14 +89,12 @@ class FormView extends Component {
           <label>
             Category
             <select name="category" onChange={this.handleChange}>
-              {Object.keys(this.state.categories).map(id => {
-                  return (
-                    <option key={id} value={id}>{this.state.categories[id]}</option>
-                  )
-                })}
+              {this.state.categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.type}</option>
+              ))}
             </select>
           </label>
-          <input type="submit" className="button" value="Submit" />
+          <input type="submit" className="button form-button" value="Submit" />
         </form>
       </div>
     );

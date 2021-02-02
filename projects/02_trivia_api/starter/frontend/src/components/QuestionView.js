@@ -42,9 +42,9 @@ class QuestionView extends Component {
 
   selectPage(num) {
     if (this.state.currentCategory !== undefined) {
-      this.getByCategory(this.state.currentCategory.id);
+    this.setState({page: num}, () => this.getByCategory(this.state.currentCategory.id));
     } else {
-      this.getQuestions();
+      this.setState({page: num}, () => this.getQuestions());
     }
   }
 

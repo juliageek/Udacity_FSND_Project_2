@@ -1,7 +1,27 @@
 .form-view > label {
-  padding: 0px 0px 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
 }
 
-#add-form {
-  text-align: center;
+.form-view {
+  padding: 16px;
+}
+
+.form-view > label > input, .form-view > label > select {
+  padding: 4px 0;
+  margin: 4px 0;
+}
+
+.add-form {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.form-title {
+  padding: 8px 16px 0 16px;
+  font-size: 2rem;
 }
