@@ -48,6 +48,25 @@ def create_app(test_config=None):
             'categories': categories
         })
 
+    @app.route('/categories/<int:category_id>/questions')
+    def retrieve_questions_per_category(category_id):
+        questions = Question.query.filter_by(category=category_id).all()
+        current_questions = paginate_questions(request, questions)
+        current_category = Category.query.filter_by(id=category_id).one_or_none()
+
+        if current_category is None:
+            abort(400)
+
+        if len(current_questions) == 0:
+            abort(404)
+
+        return jsonify({
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(questions),
+            'current_category': current_category.format()
+        })
+
     @app.route('/questions')
     def retrieve_questions():
         all_questions = Question.query.order_by('id').all()
@@ -61,11 +80,19 @@ def create_app(test_config=None):
             'success': True,
             'questions': current_questions,
             'total_questions': len(all_questions),
-            'categories': [category['type'] for category in categories]
+            'categories': [category for category in categories]
         })
 
+    @app.errorhandler(400)
+    def bad_request():
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request"
+        }), 400
+
     @app.errorhandler(404)
-    def not_found(error):
+    def not_found():
         return jsonify({
             "success": False,
             "error": 404,

@@ -1,0 +1,24 @@
+.app-logo {
+  animation: App-logo-spin infinite 20s linear;
+  pointer-events: none;
+  color: dodgerblue;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.5em;
+  padding: 2%;
+}
+
+.app-header {
+  background-color: #282c34;
+  min-height: 10vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.header-link {
+   cursor: pointer;
+   padding: 0 2rem;
+}

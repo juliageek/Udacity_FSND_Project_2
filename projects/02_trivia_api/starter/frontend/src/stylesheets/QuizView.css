@@ -22,7 +22,7 @@
 .categories-list {
   flex-basis: 25%;
   flex-shrink: 2;
-  padding: 16px 8px;
+  padding: 0 8px;
 }
 
 .categories-list > form {
@@ -33,6 +33,16 @@
    display: flex;
    align-items: center;
    justify-content: space-between;
+   cursor: pointer;
+   padding: 4px 0;
+}
+
+.category:hover {
+    color: dodgerblue;
+}
+
+.category:hover {
+    color: dodgerblue;
 }
 
 .button {
@@ -40,12 +50,11 @@
     margin-top: 5px;
     background-color: dodgerblue;
     color: white;
-    padding: 3px 5px;
-    align-self: center;
+    padding: 8px;
+    border-radius: 4px;
 }
 
 div.button {
-    margin-top: 20px;
     margin-left: calc(50% - 50px);
 }
 

@@ -6,7 +6,6 @@ sys.path.append(topdir)
 
 import unittest
 import json
-import copy
 from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app, jsonify
 from models import setup_db, Question, Category
@@ -110,6 +109,22 @@ class AppTestCase(unittest.TestCase):
 
         self.assertFalse(data['success'])
         self.assertEqual(data['error'], 404)
+
+    def test_get_questions_per_category(self):
+        """Test get questions for a specific category endpoint"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+        self.load_fixture('tests/fixtures/categories.json', Category)
+
+        questions = Question.query.filter_by(category=1).all()
+
+        res = self.client().get('/categories/1/questions')
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertTrue(data['success'])
+        self.assertEqual(len(data['questions']), len(questions))
+        self.assertEqual(data['total_questions'], len(questions))
+        self.assertEqual(data['current_category']['id'], 1)
+        self.assertEqual(data['current_category']['type'], 'Science')
 
 
 if __name__ == "__main__":

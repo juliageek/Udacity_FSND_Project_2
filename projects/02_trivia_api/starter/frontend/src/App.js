@@ -12,7 +12,6 @@ import QuestionView from './components/QuestionView';
 import Header from './components/Header';
 import QuizView from './components/QuizView';
 
-
 class App extends Component {
   render() {
     return (

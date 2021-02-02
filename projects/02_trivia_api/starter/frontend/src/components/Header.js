@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from '../logo.svg';
 import '../stylesheets/Header.css';
 
 class Header extends Component {
@@ -10,11 +9,20 @@ class Header extends Component {
 
   render() {
     return (
-      <div className="App-header">
-        <h1 onClick={() => {this.navTo('')}}>Udacitrivia</h1>
-        <h2 onClick={() => {this.navTo('')}}>List</h2>
-        <h2 onClick={() => {this.navTo('/add')}}>Add</h2>
-        <h2 onClick={() => {this.navTo('/play')}}>Play</h2>
+      <div className="app-header">
+        <div className="app-logo" onClick={() => {this.navTo('')}}>Udacitrivia</div>
+        <div
+          className="header-link"
+          onClick={() => {this.navTo('/add')}}
+        >
+          Add
+        </div>
+        <div
+          className="header-link"
+          onClick={() => {this.navTo('/play')}}
+        >
+          Play
+        </div>
       </div>
     );
   }

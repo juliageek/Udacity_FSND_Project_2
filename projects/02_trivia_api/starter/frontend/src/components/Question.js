@@ -16,10 +16,10 @@ class Question extends Component {
   render() {
     const { question, answer, category, difficulty } = this.props;
     return (
-      <div className="Question-holder">
-        <div className="Question">{question}</div>
-        <div className="Question-status">
-          <img className="category" src={`${category.toLowerCase()}.svg`}/>
+      <div className="question-holder">
+        <div className="question">{question}</div>
+        <div className="question-status">
+          <img className="category" src={`${category.type.toLowerCase()}.svg`}/>
           <div className="difficulty">Difficulty: {difficulty}</div>
           <img src="delete.png" className="delete" onClick={() => this.props.questionAction('DELETE')}/>
           
