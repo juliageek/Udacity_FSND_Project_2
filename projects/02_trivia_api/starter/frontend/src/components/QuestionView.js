@@ -12,7 +12,7 @@ class QuestionView extends Component {
       questions: [],
       page: 1,
       totalQuestions: 0,
-      categories: {},
+      categories: [],
       currentCategory: null,
     }
   }
@@ -23,7 +23,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `/questions?page=${this.state.page}`,
       type: "GET",
       success: (result) => {
         this.setState({
@@ -41,7 +41,11 @@ class QuestionView extends Component {
   }
 
   selectPage(num) {
-    this.setState({page: num}, () => this.getQuestions());
+    if (this.state.currentCategory !== undefined) {
+      this.getByCategory(this.state.currentCategory.id);
+    } else {
+      this.getQuestions();
+    }
   }
 
   createPagination(){
@@ -58,15 +62,16 @@ class QuestionView extends Component {
     return pageNumbers;
   }
 
-  getByCategory= (id) => {
+  getByCategory=(id) => {
     $.ajax({
-      url: `/categories/${id}/questions`, //TODO: update request URL
+      url: `/categories/${id}/questions?page=${this.state.page}`,
       type: "GET",
       success: (result) => {
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
-          currentCategory: result.current_category })
+          currentCategory: result.current_category
+        })
         return;
       },
       error: (error) => {
@@ -78,7 +83,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/questions`, //TODO: update request URL
+      url: `/questions`,
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -125,14 +130,22 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
+            <li
+              className="category"
+              key="0"
+              onClick={() => {this.getQuestions()}}
+            >
+              All
+              <img className="category" src="question.svg"/>
+            </li>
+              {this.state.categories.map((category) => (
               <li
                 className="category"
-                key={id}
-                onClick={() => {this.getByCategory(id)}}
+                key={category.id}
+                onClick={() => {this.getByCategory(category.id)}}
               >
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id].toLowerCase()}.svg`}/>
+                {category.type}
+                <img className="category" src={`${category.type.toLowerCase()}.svg`}/>
               </li>
             ))}
           </ul>
