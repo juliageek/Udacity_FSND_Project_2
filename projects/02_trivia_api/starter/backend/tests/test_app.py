@@ -220,6 +220,30 @@ class AppTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(res.status_code, 404)
 
+    def test_delete_question(self):
+        """Test deleting a question"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        res = self.client().delete('/questions/1')
+        data = json.loads(res.get_data(as_text=True))
+
+        question = Question.query.filter(Question.id == 1).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['deleted'], 1)
+        self.assertEqual(question, None)
+
+    def test_delete_question_404_error(self):
+        """Test error 404 response when deleting a question"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        res = self.client().delete('/questions/24')
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 404)
+        self.assertFalse(data['success'])
+
 
 if __name__ == "__main__":
     unittest.main()

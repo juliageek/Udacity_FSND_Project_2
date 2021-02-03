@@ -118,6 +118,24 @@ def create_app(test_config=None):
             print(sys.exc_info())
             abort(422)
 
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
+        try:
+            question = Question.query.filter(Question.id == question_id).one_or_none()
+
+            if question is None:
+                abort(404)
+
+            question.delete()
+
+            return jsonify({
+                'success': True,
+                'deleted': question_id
+            })
+
+        except():
+            abort(422)
+
     @app.route('/quizzes', methods=['POST'])
     def return_quiz():
         body = request.get_json()
@@ -183,15 +201,7 @@ def create_app(test_config=None):
         }), 422
 
     '''
-    @TODO: 
-    Create an endpoint to DELETE question using a question ID. 
-  
-    TEST: When you click the trash icon next to a question, the question will be removed.
-    This removal will persist in the database and when you refresh the page. 
-    '''
-
-    '''
-    @TODO: 
+    @TODO:
     Create a POST endpoint to get questions based on a search term. 
     It should return any questions for whom the search term 
     is a substring of the question. 
