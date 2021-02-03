@@ -183,6 +183,43 @@ class AppTestCase(unittest.TestCase):
         self.assertFalse(data['success'])
         self.assertEqual(res.status_code, 400)
 
+    def test_get_quiz_question(self):
+        """Test getting a new question for a quiz"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        questions = Question.query.filter_by(category=3).all()
+
+        quiz_info = {
+            'previous_questions': [9, 11],
+            'quiz_category': {
+                'id': 3,
+                'type': 'Geography'
+            }
+        }
+
+        res = self.client().post('/quizzes', json=quiz_info)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertTrue(data['success'])
+        self.assertNotIn(data.get('question').get('id'), quiz_info.get('previous_questions'))
+        self.assertEqual(len(data['previous_questions']), 3)
+
+    def test_get_quiz_question_404_error(self):
+        """Test getting a new question for a quiz"""
+        quiz_info = {
+            'previous_questions': [9, 11],
+            'quiz_category': {
+                'id': 3,
+                'type': 'Geography'
+            }
+        }
+
+        res = self.client().post('/quizzes', json=quiz_info)
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertFalse(data['success'])
+        self.assertEqual(res.status_code, 404)
+
 
 if __name__ == "__main__":
     unittest.main()
