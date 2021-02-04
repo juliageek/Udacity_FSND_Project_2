@@ -3,11 +3,6 @@
   flex-direction: row;
 }
 
-.questions-list {
-  flex-basis: 75%;
-  text-align: center;
-}
-
 .question-holder {
   padding: 10px 20px;
   border: 1px #989898 solid;

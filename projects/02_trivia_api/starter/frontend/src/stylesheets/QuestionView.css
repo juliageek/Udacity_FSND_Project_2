@@ -1,0 +1,9 @@
+.questions-list {
+  flex-basis: 75%;
+  text-align: center;
+}
+
+.no-questions {
+    height: 100%;
+    padding: 16px;
+}
