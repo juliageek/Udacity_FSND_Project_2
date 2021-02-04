@@ -1,6 +1,7 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from models import setup_db, Question, Category
+from sqlalchemy import and_
 import sys
 import random
 
@@ -68,14 +69,29 @@ def create_app(test_config=None):
             'current_category': current_category.format()
         })
 
+    @app.route('/categories/<int:category_id>/questions', methods=['POST'])
+    def search_questions_per_category(category_id):
+        body = request.get_json()
+        search = body.get('searchTerm', None)
+        selection = Question.query\
+            .order_by(Question.id)\
+            .filter(and_(Question.question.ilike('%{}%'.format(search)),
+                         Question.category == category_id)).all()
+        current_questions = paginate_questions(request, selection)
+        current_category = Category.query.filter_by(id=category_id).one_or_none()
+
+        return jsonify({
+            'success': True,
+            'questions': current_questions,
+            'total_questions': len(selection),
+            'current_category': current_category.format()
+        })
+
     @app.route('/questions')
     def retrieve_questions():
         all_questions = Question.query.order_by('id').all()
         current_questions = paginate_questions(request, all_questions)
         categories = [category.format() for category in Category.query.order_by('id').all()]
-
-        if len(all_questions) == 0:
-            abort(404)
 
         return jsonify({
             'success': True,
@@ -85,38 +101,56 @@ def create_app(test_config=None):
         })
 
     @app.route('/questions', methods=['POST'])
-    def create_question():
+    def create_or_search_question():
         body = request.get_json()
-        question = body.get('question')
-        answer = body.get('answer')
-        category = body.get('category')
-        difficulty = body.get('difficulty')
+        search = body.get('searchTerm', None)
 
-        try:
-            if question == '' or answer == '':
-                abort(400)
+        if search is None:
+            question = body.get('question')
+            answer = body.get('answer')
+            category = body.get('category')
+            difficulty = body.get('difficulty')
 
-            question = Question(
-                question=question,
-                answer=answer,
-                category=category,
-                difficulty=difficulty
-            )
-            question.insert()
+            try:
+                if question == '' or answer == '':
+                    abort(400)
 
-            all_questions = Question.query.order_by('id').all()
-            current_questions = paginate_questions(request, all_questions)
+                question = Question(
+                    question=question,
+                    answer=answer,
+                    category=category,
+                    difficulty=difficulty
+                )
+                question.insert()
 
-            return jsonify({
-                'success': True,
-                'created': question.id,
-                'current_questions': current_questions,
-                'total_questions': len(all_questions)
-            })
+                all_questions = Question.query.order_by('id').all()
+                current_questions = paginate_questions(request, all_questions)
 
-        except():
-            print(sys.exc_info())
-            abort(422)
+                return jsonify({
+                    'success': True,
+                    'created': question.id,
+                    'current_questions': current_questions,
+                    'total_questions': len(all_questions)
+                })
+
+            except():
+                print(sys.exc_info())
+                abort(422)
+
+        else:
+            try:
+                selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
+                current_questions = paginate_questions(request, selection)
+
+                return jsonify({
+                    'success': True,
+                    'questions': current_questions,
+                    'total_questions': len(selection.all())
+                })
+
+            except():
+                print(sys.exc_info())
+                abort(422)
 
     @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
@@ -199,16 +233,5 @@ def create_app(test_config=None):
             "error": 422,
             "message": "unprocessable"
         }), 422
-
-    '''
-    @TODO:
-    Create a POST endpoint to get questions based on a search term. 
-    It should return any questions for whom the search term 
-    is a substring of the question. 
-  
-    TEST: Search by any phrase. The questions list will update to include 
-    only question that include that string within their question. 
-    Try using the word "title" to start. 
-    '''
 
     return app

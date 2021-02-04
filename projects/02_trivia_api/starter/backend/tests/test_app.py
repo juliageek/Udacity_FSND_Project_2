@@ -100,16 +100,6 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(data['total_questions'], len(questions))
         self.assertTrue(data['categories'])
 
-    def test_retrieve_questions_404_error(self):
-        """Test get questions endpoint with page parameter"""
-        self.load_fixture('tests/fixtures/categories.json', Category)
-
-        res = self.client().get('/questions?page=3')
-        data = json.loads(res.get_data(as_text=True))
-
-        self.assertFalse(data['success'])
-        self.assertEqual(data['error'], 404)
-
     def test_get_questions_per_category(self):
         """Test get questions for a specific category endpoint"""
         self.load_fixture('tests/fixtures/questions.json', Question)
@@ -243,6 +233,29 @@ class AppTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 404)
         self.assertFalse(data['success'])
+
+    def test_search_question(self):
+        """Test deleting a question"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+
+        res = self.client().post('/questions', json={'searchTerm': 'which'})
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['total_questions'], 10)
+
+    def test_search_question_with_category(self):
+        """Test deleting a question"""
+        self.load_fixture('tests/fixtures/questions.json', Question)
+        self.load_fixture('tests/fixtures/categories.json', Category)
+
+        res = self.client().post('/categories/2/questions', json={'searchTerm': 'which'})
+        data = json.loads(res.get_data(as_text=True))
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['total_questions'], 2)
 
 
 if __name__ == "__main__":
